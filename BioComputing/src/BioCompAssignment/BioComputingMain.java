@@ -25,6 +25,12 @@ public class BioComputingMain {
 
     public static void main(String[] args) throws FileNotFoundException {
 
+        run();
+        
+    }
+    
+    public static void run() throws FileNotFoundException {
+
         PrintWriter pw = new PrintWriter(new File("filedump/test.csv"));
         StringBuilder sb = new StringBuilder();
 
