@@ -6,7 +6,9 @@ package BioCompAssignment;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -16,9 +18,11 @@ import java.util.Scanner;
  */
 public class BioComputingMain {
 
-    private static final int GENOMES = 5;
-    private static final int POPULATION_SIZE = 60;
-    private static final int RULESET_POPULATION_SIZE = 32;
+    private static final int RULE_GENOMES = 5;
+    private static final int RULETRAINING_POPULATION_SIZE = 32;
+    private static final int RULESET_POPULATION_SIZE = 10;
+    private static final int GENOMES = 60;
+    private static final int POPULATION_SIZE = 10;
     private static final int GENERATIONS = 50;
     private static final double MUTATION_RATE = 0.01;
     private static final double MUTATION_PROBABILITY = 0.5;
@@ -31,11 +35,15 @@ public class BioComputingMain {
     public static void main(String[] args) throws FileNotFoundException {
 
 //        runOriginalGA();
-        Individual[] population = new Individual[POPULATION_SIZE];
-        Rule[] rulePopulation = new Rule[RULESET_POPULATION_SIZE];
+        Individual[] IndividualPopulation = new Individual[POPULATION_SIZE];
+        Rule[] ruleTrainingPopulation = new Rule[RULETRAINING_POPULATION_SIZE];
+        Rule[] ruleOffspring = new Rule[RULESET_POPULATION_SIZE];
 
-        generateRulePopulation(rulePopulation, DATA_SET_1);
-        generatePopulation(population, GENOMES);
+        generateRulePopulation(ruleTrainingPopulation, DATA_SET_1);
+        generatePopulation(IndividualPopulation, GENOMES);
+        // plit into candidate rules
+        splitPopulation(IndividualPopulation, ruleOffspring);
+        
     }
 
     public static void runOriginalGA() throws FileNotFoundException {
@@ -133,9 +141,50 @@ public class BioComputingMain {
         }
     }
 
-    public static void splitPopulation(Individual[] population){
+    public static void splitPopulation(Individual[] population, Rule[] ruleOffspring) {
+
+        Integer[] newArray = new Integer[population[0].gene.length];
+        int i = 0;
+        for (int value : population[0].gene) {
+            newArray[i++] = Integer.valueOf(value);
+        }
+        List<Integer[]> ruleList = splitArray(newArray, 6);
         
-    }    
+        for (int j = 0; j < ruleList.size(); j++) {
+            Rule rule = new Rule(RULE_GENOMES);
+            for (int k = 0; k < ruleList.get(j).length - 1; k++) {
+                rule.gene[k] = ruleList.get(j)[k];
+            }
+            rule.output = ruleList.get(j)[ruleList.get(j).length - 1];
+            ruleOffspring[j] = rule.clone();
+        }
+        printRulePopulation(ruleOffspring);
+    }
+
+    // copied code http://stackoverflow.com/a/30095524/7173635
+    private static List<Integer[]> splitArray(Integer[] originalArray, int chunkSize) {
+
+        List<Integer[]> listOfArrays = new ArrayList<>();
+        int totalSize = originalArray.length;
+        if (totalSize < chunkSize) {
+            chunkSize = totalSize;
+        }
+        int from = 0;
+        int to = chunkSize;
+
+        while (from < totalSize) {
+            Integer[] partArray = Arrays.copyOfRange(originalArray, from, to);
+            listOfArrays.add(partArray);
+
+            from += chunkSize;
+            to = from + chunkSize;
+            if (to > totalSize) {
+                to = totalSize;
+            }
+        }
+        return listOfArrays;
+    }
+
     public static void fitness(Individual[] indy) {
 
         for (int i = 0; i < indy.length; i++) {// generate new individual with length 10 (gene size) for each iteration, which is of population size
@@ -172,6 +221,28 @@ public class BioComputingMain {
         fitness(offspring);
     }
 
+    public static void ruleSelection(Rule[] population, Rule[] offspring) {
+
+        Random rand = new Random();
+        int parent1;
+        int parent2;
+
+        for (int i = 0; i < population.length; i++) {
+            parent1 = rand.nextInt((population.length) - 1);
+            parent2 = rand.nextInt((population.length) - 1);
+
+            if (population[parent1].output >= population[parent2].output) {
+                offspring[i] = new Rule(population[parent1].gene, population[parent1].output);
+            } else {
+                offspring[i] = new Rule(population[parent2].gene, population[parent2].output);;
+            }
+
+            // fitness
+            //fitness(population);
+        }
+        //fitness(offspring);
+    }
+    
     public static void populationFitness(Individual[] population) {
 
         // average fitness
@@ -197,7 +268,7 @@ public class BioComputingMain {
     public static void printRulePopulation(Rule[] rulePopulation) {
 
         for (int i = 0; i < rulePopulation.length; i++) {
-            System.out.println("population " + i + Arrays.toString(rulePopulation[i].gene) + rulePopulation[i].output);
+            System.out.println("Rule Population " + i + Arrays.toString(rulePopulation[i].gene) + rulePopulation[i].output);
         }
     }
 
@@ -236,6 +307,33 @@ public class BioComputingMain {
         fitness(offspring);
     }
 
+    public static void ruleCrossover(Rule[] population, Rule[] offspring, double crossoverRate) {
+
+        Random r = new Random();
+        int crossover = r.nextInt(population.length + 1);
+        int halfGene = (population.length / 2);
+
+        for (int i = 0; i < halfGene; i++) {
+            if (crossoverRate > r.nextDouble()) {
+                int ind1 = i * 2;
+                int ind2 = (i * 2) + 1;
+
+                for (int l = crossover; l < population[i].gene.length; l++) {
+
+                    int tempBit = population[ind1].gene[l];
+                    population[ind1].gene[l] = population[ind2].gene[l];
+                    population[ind2].gene[l] = tempBit;
+                }
+            }
+        }
+
+        // copy population to offspring
+        for (int i = 0; i < population.length; i++) {
+            offspring[i] = population[i].clone();
+        }
+        //fitness(offspring);
+    }
+    
     public static void mutation(Individual[] population, Individual[] mutatedOffspring, double mutationRate, double mutationProbability) {
 
         // Iterate through gene, randomly select whether
@@ -269,6 +367,37 @@ public class BioComputingMain {
 //        printArray(mutatedOffspring);
     }
 
+    public static void ruleMutation(Rule[] population, Rule[] mutatedOffspring, double mutationRate, double mutationProbability) {
+
+        // Iterate through gene, randomly select whether
+        // or not to change the value of the genome
+        //
+        Rule[] offspring = new Rule[RULESET_POPULATION_SIZE];
+        Random mutant = new Random();
+
+        for (int i = 0; i < population.length; i++) {
+            if (mutationProbability > mutant.nextDouble()) {
+                offspring[i] = population[i].clone();
+            } else {
+                offspring[i] = population[i].mutate(mutationRate);
+            }
+
+        }
+
+//        fitness(population);
+//        fitness(offspring);
+
+        // deep copy using .clone
+        for (int i = 0; i < offspring.length; i++) {
+            mutatedOffspring[i] = offspring[i].clone();
+        }
+
+//        fitness(mutatedOffspring);
+
+//        // print population
+//        printArray(mutatedOffspring);
+    }
+    
     public static void keepBest(Individual[] population, Individual[] offspring) {
 
         int weakestIndex = 0;
@@ -293,6 +422,38 @@ public class BioComputingMain {
 
         for (int i = 0; i < offspring.length; i++) {
             if (offspring[i].fitness == GENOMES) {
+                FINISHED = true;
+            }
+        }
+        if (FINISHED) {
+            System.out.println("fittest " + Arrays.toString(population[fittestIndex].gene));
+        }
+    }
+    
+    public static void keepBestRule(Rule[] population, Rule[] offspring) {
+
+        int weakestIndex = 0;
+        int fittestIndex = 0;
+        for (int i = 0; i < population.length; i++) {
+            if (population[i].output >= population[fittestIndex].output) {
+                fittestIndex = i;
+            } else if (population[i].output <= population[weakestIndex].output) {
+                weakestIndex = i;
+            }
+        }
+//        System.out.println("weakest " + Arrays.toString(population[weakestIndex].gene));
+//        System.out.println("fittest " + Arrays.toString(population[fittestIndex].gene));
+
+        // overwrite weakest individual with fittest
+        population[weakestIndex] = new Rule (population[fittestIndex].gene, population[fittestIndex].output);
+
+        // Copy offspring array back to population
+        for (int i = 0; i < population.length; i++) {
+            offspring[i] = new Rule(population[i].gene, population[i].output);
+        }
+
+        for (int i = 0; i < offspring.length; i++) {
+            if (offspring[i].output == GENOMES) {
                 FINISHED = true;
             }
         }

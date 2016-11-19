@@ -5,6 +5,8 @@
  */
 package BioCompAssignment;
 
+import java.util.Random;
+
 /**
  *
  * @author Billy
@@ -44,8 +46,8 @@ public class Rule {
         this.gene = new int[length];    // new array of integers of length "length"
         this.output = fitness;
     }
-    
-    public Rule(int length){
+
+    public Rule(int length) {
         this.gene = new int[length];
     }
 
@@ -65,4 +67,23 @@ public class Rule {
         return clone;
     }
 
+    public Rule mutate(double mutationRate) {
+
+        Rule rule = new Rule(gene, output);
+        Rule ruleCopy;
+        Random mutant = new Random();
+
+        for (int j = 0; j < rule.gene.length; j++) {
+            // flip bits in array at preset probability (0.1)
+            if (mutationRate > mutant.nextDouble()) {
+                if (rule.gene[j] == 0) {
+                    rule.gene[j] = 1;
+                } else if (rule.gene[j] == 1) {
+                    rule.gene[j] = 0;
+                }
+            }
+        }
+        ruleCopy = rule.clone();
+        return ruleCopy;
+    }
 }
