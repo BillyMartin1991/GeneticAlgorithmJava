@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.Scanner;
 
 /**
  *
@@ -15,15 +16,29 @@ import java.util.Random;
  */
 public class BioComputingMain {
 
-    private static final int GENOMES = 50;
-    private static final int POPULATION_SIZE = 50;
+    private static final int GENOMES = 5;
+    private static final int POPULATION_SIZE = 60;
+    private static final int RULESET_POPULATION_SIZE = 32;
     private static final int GENERATIONS = 50;
     private static final double MUTATION_RATE = 0.01;
     private static final double MUTATION_PROBABILITY = 0.5;
     private static final double CROSSOVER_RATE = 1;
     private static boolean FINISHED = false;
+    private static final String DATA_SET_1 = "/Resource/data1.txt";
+    private static final String DATA_SET_2 = "/Resource/data2.txt";
+    private static final String DATA_SET_3 = "/Resource/data3.txt";
 
     public static void main(String[] args) throws FileNotFoundException {
+
+//        runOriginalGA();
+        Individual[] population = new Individual[POPULATION_SIZE];
+        Rule[] rulePopulation = new Rule[RULESET_POPULATION_SIZE];
+
+        generateRulePopulation(rulePopulation, DATA_SET_1);
+        generatePopulation(population, GENOMES);
+    }
+
+    public static void runOriginalGA() throws FileNotFoundException {
 
         PrintWriter pw = new PrintWriter(new File("filedump/test.csv"));
         StringBuilder sb = new StringBuilder();
@@ -67,6 +82,44 @@ public class BioComputingMain {
 
     }
 
+    public static void generateRulePopulation(Rule[] rulePopulation, String File) {
+
+        // Get Gonome Length from file
+        Scanner sc = new Scanner(BioComputingMain.class.getResourceAsStream(File));
+        sc.nextLine();
+        int genomes;
+        String genomeString = sc.nextLine();
+        String[] genomeStringBuilder = genomeString.split(" ");
+        genomes = genomeStringBuilder[0].length();
+
+        String ruleString;
+        String newRule;
+        String outputString;
+        String[] ruleBuilder;
+        String[] ruleArrayString;
+
+        Scanner scan = new Scanner(BioComputingMain.class.getResourceAsStream(File));
+        scan.nextLine();
+        for (int i = 0; i < rulePopulation.length; i++) {
+            Rule rule = new Rule(genomes);
+            ruleString = scan.nextLine();
+            ruleBuilder = ruleString.split(" ");
+
+            newRule = ruleBuilder[0];
+            outputString = ruleBuilder[1];
+
+            ruleArrayString = newRule.split("");
+            for (int j = 0; j < rule.gene.length; j++) {
+                rule.gene[j] = Integer.parseInt(ruleArrayString[j]);
+            }
+
+            rule.output = Integer.parseInt(outputString);
+            rulePopulation[i] = rule;
+            rulePopulation[i] = rulePopulation[i].clone();
+        }
+        printRulePopulation(rulePopulation);
+    }
+
     public static void generatePopulation(Individual[] population, int genomes) {
 
         Random random = new Random();
@@ -80,6 +133,9 @@ public class BioComputingMain {
         }
     }
 
+    public static void splitPopulation(Individual[] population){
+        
+    }    
     public static void fitness(Individual[] indy) {
 
         for (int i = 0; i < indy.length; i++) {// generate new individual with length 10 (gene size) for each iteration, which is of population size
@@ -136,6 +192,13 @@ public class BioComputingMain {
         }
         System.out.println("\nfittest =" + (population[fittestIndex].fitness));
         System.out.println("population avg. fitness = " + averageFitness);
+    }
+
+    public static void printRulePopulation(Rule[] rulePopulation) {
+
+        for (int i = 0; i < rulePopulation.length; i++) {
+            System.out.println("population " + i + Arrays.toString(rulePopulation[i].gene) + rulePopulation[i].output);
+        }
     }
 
     public static void printArray(Individual[] population) {
@@ -238,32 +301,32 @@ public class BioComputingMain {
         }
     }
 
-    public static void writeToFile(Individual [] population, StringBuilder sb, int generations) {
-        
-        int fittestIndex = 0;
-            for (int j = 0; j < population.length; j++) {
-                if (population[j].fitness >= population[fittestIndex].fitness) {
-                    fittestIndex = j;
-                }
-            }
-            int j;
-            int k = 0;
-            for (int l = 0; l < population.length; l++) {
-                j = population[l].fitness;
-                k = k + j;
-            }
-            double averageFitness = (double) k / population.length;
+    public static void writeToFile(Individual[] population, StringBuilder sb, int generations) {
 
-            for (int l = 0; l < population[fittestIndex].gene.length; l++) {
-                sb.append(population[fittestIndex].gene[l]);
+        int fittestIndex = 0;
+        for (int j = 0; j < population.length; j++) {
+            if (population[j].fitness >= population[fittestIndex].fitness) {
+                fittestIndex = j;
             }
-            sb.append(',');
-            sb.append(population[fittestIndex].fitness);
-            sb.append(',');
-            sb.append(averageFitness);
-            sb.append(',');
-            sb.append(generations);
-            sb.append('\n');
-            
+        }
+        int j;
+        int k = 0;
+        for (int l = 0; l < population.length; l++) {
+            j = population[l].fitness;
+            k = k + j;
+        }
+        double averageFitness = (double) k / population.length;
+
+        for (int l = 0; l < population[fittestIndex].gene.length; l++) {
+            sb.append(population[fittestIndex].gene[l]);
+        }
+        sb.append(',');
+        sb.append(population[fittestIndex].fitness);
+        sb.append(',');
+        sb.append(averageFitness);
+        sb.append(',');
+        sb.append(generations);
+        sb.append('\n');
+
     }
 }
