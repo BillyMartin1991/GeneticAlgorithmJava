@@ -40,7 +40,7 @@ public class BioComputingMain {
         Rule[] ruleOffspring = new Rule[RULESET_POPULATION_SIZE];
 
         generateRulePopulation(ruleTrainingPopulation, DATA_SET_1);
-        generatePopulation(IndividualPopulation, GENOMES);
+        generateIndividualPopulation(IndividualPopulation, GENOMES);
         // plit into candidate rules
         splitPopulation(IndividualPopulation, ruleOffspring);
         
@@ -54,7 +54,7 @@ public class BioComputingMain {
         Individual[] population = new Individual[POPULATION_SIZE];  // new Array of Individuals
         Individual[] offspring = new Individual[POPULATION_SIZE];
 
-        generatePopulation(population, GENOMES);
+        generateIndividualPopulation(population, GENOMES);
         fitness(population);
         populationFitness(population);
 
@@ -128,7 +128,7 @@ public class BioComputingMain {
         printRulePopulation(rulePopulation);
     }
 
-    public static void generatePopulation(Individual[] population, int genomes) {
+    public static void generateIndividualPopulation(Individual[] population, int genomes) {
 
         Random random = new Random();
         for (int i = 0; i < population.length; i++) {
@@ -199,27 +199,6 @@ public class BioComputingMain {
         }
     }
 
-    public static void selection(Individual[] population, Individual[] offspring) {
-
-        Random rand = new Random();
-        int parent1;
-        int parent2;
-
-        for (int i = 0; i < population.length; i++) {
-            parent1 = rand.nextInt((population.length) - 1);
-            parent2 = rand.nextInt((population.length) - 1);
-
-            if (population[parent1].fitness >= population[parent2].fitness) {
-                offspring[i] = new Individual(population[parent1].gene, population[parent1].fitness);
-            } else {
-                offspring[i] = new Individual(population[parent2].gene, population[parent2].fitness);;
-            }
-
-            // fitness
-            fitness(population);
-        }
-        fitness(offspring);
-    }
 
     public static void ruleSelection(Rule[] population, Rule[] offspring) {
 
@@ -280,33 +259,6 @@ public class BioComputingMain {
         System.out.println("\n");
     }
 
-    public static void crossover(Individual[] population, Individual[] offspring, double crossoverRate) {
-
-        Random r = new Random();
-        int crossover = r.nextInt(population.length + 1);
-        int halfGene = (population.length / 2);
-
-        for (int i = 0; i < halfGene; i++) {
-            if (crossoverRate > r.nextDouble()) {
-                int ind1 = i * 2;
-                int ind2 = (i * 2) + 1;
-
-                for (int l = crossover; l < population[i].gene.length; l++) {
-
-                    int tempBit = population[ind1].gene[l];
-                    population[ind1].gene[l] = population[ind2].gene[l];
-                    population[ind2].gene[l] = tempBit;
-                }
-            }
-        }
-
-        // copy population to offspring
-        for (int i = 0; i < population.length; i++) {
-            offspring[i] = population[i].clone();
-        }
-        fitness(offspring);
-    }
-
     public static void ruleCrossover(Rule[] population, Rule[] offspring, double crossoverRate) {
 
         Random r = new Random();
@@ -332,39 +284,6 @@ public class BioComputingMain {
             offspring[i] = population[i].clone();
         }
         //fitness(offspring);
-    }
-    
-    public static void mutation(Individual[] population, Individual[] mutatedOffspring, double mutationRate, double mutationProbability) {
-
-        // Iterate through gene, randomly select whether
-        // or not to change the value of the genome
-        //
-//        System.out.println("\nMUTATION\n");
-        Individual[] offspring = new Individual[POPULATION_SIZE];
-        Random mutant = new Random();
-
-        for (int i = 0; i < population.length; i++) {
-            if (mutationProbability > mutant.nextDouble()) {
-                offspring[i] = population[i].clone();
-            } else {
-                offspring[i] = population[i].mutate(mutationRate);
-            }
-
-        }
-
-        fitness(population);
-        fitness(offspring);
-
-        // deep copy using .clone
-        for (int i = 0; i < offspring.length; i++) {
-            mutatedOffspring[i] = offspring[i].clone();
-        }
-
-        fitness(mutatedOffspring);
-//        System.out.println("mutated offspring");
-
-//        // print population
-//        printArray(mutatedOffspring);
     }
 
     public static void ruleMutation(Rule[] population, Rule[] mutatedOffspring, double mutationRate, double mutationProbability) {
@@ -397,39 +316,7 @@ public class BioComputingMain {
 //        // print population
 //        printArray(mutatedOffspring);
     }
-    
-    public static void keepBest(Individual[] population, Individual[] offspring) {
-
-        int weakestIndex = 0;
-        int fittestIndex = 0;
-        for (int i = 0; i < population.length; i++) {
-            if (population[i].fitness >= population[fittestIndex].fitness) {
-                fittestIndex = i;
-            } else if (population[i].fitness <= population[weakestIndex].fitness) {
-                weakestIndex = i;
-            }
-        }
-//        System.out.println("weakest " + Arrays.toString(population[weakestIndex].gene));
-//        System.out.println("fittest " + Arrays.toString(population[fittestIndex].gene));
-
-        // overwrite weakest individual with fittest
-        population[weakestIndex] = new Individual(population[fittestIndex].gene, population[fittestIndex].fitness);
-
-        // Copy offspring array back to population
-        for (int i = 0; i < population.length; i++) {
-            offspring[i] = new Individual(population[i].gene, population[i].fitness);
-        }
-
-        for (int i = 0; i < offspring.length; i++) {
-            if (offspring[i].fitness == GENOMES) {
-                FINISHED = true;
-            }
-        }
-        if (FINISHED) {
-            System.out.println("fittest " + Arrays.toString(population[fittestIndex].gene));
-        }
-    }
-    
+       
     public static void keepBestRule(Rule[] population, Rule[] offspring) {
 
         int weakestIndex = 0;
