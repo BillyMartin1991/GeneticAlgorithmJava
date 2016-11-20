@@ -14,6 +14,7 @@ import java.util.Random;
 public class Rule {
 
     public int output;
+    public int fitness;
     public int[] gene;
 
     public int[] getGene() {
@@ -24,41 +25,51 @@ public class Rule {
         this.gene = gene;
     }
 
-    /**
-     * Get the value of fitness
-     *
-     * @return the value of fitness
-     */
-    public int getFitness() {
+    public int getOutput() {
         return output;
     }
 
-    /**
-     * Set the value of fitness
-     *
-     * @param fitness new value of fitness
-     */
-    public void setFitness(int fitness) {
-        this.output = fitness;
+    public void setOutput(int output) {
+        this.output = output;
+    }
+    
+    public int getFitness() {
+        return fitness;
     }
 
-    public Rule(int length, int fitness) {     // new individual takes in int length
+    public void setFitness(int fitness) {
+        this.fitness = fitness;
+    }
+
+    public Rule(int length, int output) {     // new individual takes in int length
         this.gene = new int[length];    // new array of integers of length "length"
-        this.output = fitness;
+        this.output = output;
     }
 
     public Rule(int length) {
         this.gene = new int[length];
+        this.output = output;
     }
 
     public Rule(int[] gene) {
         this.gene = gene;
-        this.output = 0;
+        this.output = output;
     }
 
     public Rule(int[] gene, int fitness) {
         this.gene = gene;
-        this.output = fitness;
+        this.fitness = fitness;
+    }
+
+    public Rule(int output, int[] gene) {
+        this.output = output;
+        this.gene = gene;
+    }
+
+    public Rule(int output, int fitness, int[] gene) {
+        this.output = output;
+        this.fitness = fitness;
+        this.gene = gene;
     }
 
     public Rule clone() {
