@@ -55,6 +55,7 @@ public class Individual {
     public Individual clone() {
         Individual clone = new Individual(gene.length);
         clone.gene = gene.clone();
+        clone.fitness = fitness;
         return clone;
     }
 
