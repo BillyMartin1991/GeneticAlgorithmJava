@@ -18,10 +18,15 @@ import java.util.Scanner;
  */
 public class GA {
 
-    private static final int RULE_GENOMES = 5;
-    private static final int RULETRAINING_POPULATION_SIZE = 32;
+//    // DataSet1
+//    private static final int RULE_GENOMES = 6;
+//    private static final int RULETRAINING_POPULATION_SIZE = 64;
+//    private static final int GENOMES = 70;
+    // DataSet2
+    private static final int RULE_GENOMES = 6;
+    private static final int RULETRAINING_POPULATION_SIZE = 64;
     private static final int RULESET_POPULATION_SIZE = 10;
-    private static final int GENOMES = 60;
+    private static final int GENOMES = 70;
     private static final int POPULATION_SIZE = 10;
     private static final int GENERATIONS = 50;
     private static final double MUTATION_RATE = 0.1;
@@ -38,18 +43,18 @@ public class GA {
     }
 
     public static void runneth() {
-        
+
         Individual[] IndividualPopulation = new Individual[POPULATION_SIZE];
         Individual[] offspring = new Individual[POPULATION_SIZE];
         Rule[] ruleTrainingPopulation = new Rule[RULETRAINING_POPULATION_SIZE];
         Rule[] rulePopulation = new Rule[RULESET_POPULATION_SIZE];
         int generations = 0;
 
-        generateRulePopulation(ruleTrainingPopulation, DATA_SET_1);
+        generateRulePopulation(ruleTrainingPopulation, DATA_SET_2);
         generateIndividualPopulation(IndividualPopulation, GENOMES);
 
         while (NOT_FINISHED) {
-//        for (int i = 0; i < 1000; i++) {
+//        for (int i = 0; i < 10; i++) {
 
             generations++;
 
@@ -116,10 +121,20 @@ public class GA {
     public static void generateIndividualPopulation(Individual[] population, int genomes) {
 
         Random random = new Random();
+        int counter = 0;
+
         for (int i = 0; i < population.length; i++) {
+
             Individual indv = new Individual(genomes);   // generate new individual with length 10 (gene size) for each iteration, which is of population size
             for (int j = 0; j < indv.gene.length; j++) {
-                indv.gene[j] = random.nextInt(2);   // for each genome in the new individual's gene array generate a random number between 0-1
+                if (counter == 6) {                     // Make sure output genes aren't wildcard
+                    indv.gene[j] = random.nextInt(2);
+                    counter = 0;
+                } else {
+                    counter++;
+                    indv.gene[j] = random.nextInt(3);   // for each genome in the new individual's gene array generate a random number between 0-2
+
+                }
             }
             population[i] = indv;
             System.out.println("population gene " + i + "= " + Arrays.toString(population[i].gene));
@@ -242,8 +257,10 @@ public class GA {
                 same = false;
             } else {
                 for (int i = 0; i < array2.length; i++) {
-                    if (array2[i] != array1[i]) {
-                        same = false;
+                    if ((array2[i] != array1[i])) {
+                        if (array1[i] != 2) {
+                            same = false;
+                        }
                     }
                 }
             }
@@ -264,6 +281,9 @@ public class GA {
                 for (int j = 0; j < trainingSet.length; j++) {
                     if (compareArrays(rulePopulation[i].gene, trainingSet[j].gene)) {
                         if (rulePopulation[i].output == trainingSet[j].output) {
+                            System.out.println("MATCH!");
+                            System.out.println(Arrays.toString(rulePopulation[i].gene) + rulePopulation[i].output +
+                                    "\n" + Arrays.toString(trainingSet[j].gene) + trainingSet[j].output);
                             population[z].fitness++;
                             break;
                         }
@@ -292,6 +312,7 @@ public class GA {
             }
         }
         System.out.println("Total Fitness " + totalFitness);
+        printRulePopulation(allGeneratedRules);
         return totalFitness;
     }
 
@@ -443,7 +464,6 @@ public class GA {
 //        if(totalFitness(individualPopulation, trainingSet) == RULETRAINING_POPULATION_SIZE){
 //           NOT_FINISHED = false; 
 //        }
-
         if (!NOT_FINISHED) {
             System.out.println("finished.\nGeneration " + generations);
             printArray(individualPopulation);
