@@ -22,15 +22,14 @@ public class GA {
 //    private static final int RULE_GENOMES = 6;
 //    private static final int RULETRAINING_POPULATION_SIZE = 64;
 //    private static final int GENOMES = 70;
-    
     // DataSet2
     private static final int RULE_GENOMES = 6;
     private static final int RULETRAINING_POPULATION_SIZE = 64;
     private static final int RULESET_POPULATION_SIZE = 10;
     private static final int GENOMES = 70;
-    private static final int POPULATION_SIZE = 10;
+    private static final int POPULATION_SIZE = 100;
     private static final int GENERATIONS = 50;
-    private static final double MUTATION_RATE = 0.1;
+    private static final double MUTATION_RATE = 0.01;
     private static final double MUTATION_PROBABILITY = 1;
     private static final double CROSSOVER_RATE = 1;
     private static boolean NOT_FINISHED = true;
@@ -54,28 +53,46 @@ public class GA {
         generateRulePopulation(ruleTrainingPopulation, DATA_SET_2);
         generateIndividualPopulation(IndividualPopulation, GENOMES);
 
+        System.out.println("\nFitness");
+        fitness(IndividualPopulation, rulePopulation, ruleTrainingPopulation);
+        populationAverageFitness(IndividualPopulation);
+
+        // Selection, Xover, Mutation
+        selection(IndividualPopulation, offspring);
+        crossover(offspring, IndividualPopulation, CROSSOVER_RATE);
+        mutation(IndividualPopulation, offspring, MUTATION_RATE, MUTATION_PROBABILITY, RULE_GENOMES);
+
+        fitness(offspring, rulePopulation, ruleTrainingPopulation);
+        totalFitness(offspring, ruleTrainingPopulation);
+        populationAverageFitness(offspring);
+        keepBest(offspring, IndividualPopulation);
+        Individual saveFittest = getFittest(IndividualPopulation);
+
         while (NOT_FINISHED) {
-//        for (int i = 0; i < 10; i++) {
+//        for (int i = 0; i < 1000; i++) {
 
             generations++;
 
             // Calculate Fitness
-            System.out.println("\nFitness");
             fitness(IndividualPopulation, rulePopulation, ruleTrainingPopulation);
             populationAverageFitness(IndividualPopulation);
 
             // Selection, Xover, Mutation
             selection(IndividualPopulation, offspring);
             crossover(offspring, IndividualPopulation, CROSSOVER_RATE);
-            mutation(IndividualPopulation, offspring, MUTATION_RATE, MUTATION_PROBABILITY);
+            mutation(IndividualPopulation, offspring, MUTATION_RATE, MUTATION_PROBABILITY, RULE_GENOMES);
 
             fitness(offspring, rulePopulation, ruleTrainingPopulation);
-            printArray(offspring);
-            System.out.println("total Fitness");
             totalFitness(offspring, ruleTrainingPopulation);
             populationAverageFitness(offspring);
-
             keepBest(offspring, IndividualPopulation);
+
+            IndividualPopulation = compareBest(saveFittest, IndividualPopulation);
+            saveFittest = getFittest(IndividualPopulation).clone();
+
+            fitness(offspring, rulePopulation, ruleTrainingPopulation);
+            totalFitness(offspring, ruleTrainingPopulation);
+            populationAverageFitness(offspring);
 
             finished(IndividualPopulation, ruleTrainingPopulation, generations);
         }
@@ -128,7 +145,7 @@ public class GA {
 
             Individual indv = new Individual(genomes);   // generate new individual with length 10 (gene size) for each iteration, which is of population size
             for (int j = 0; j < indv.gene.length; j++) {
-                if (counter == 6) {                     // Make sure output genes aren't wildcard
+                if (counter == RULE_GENOMES) {                     // Make sure output genes aren't wildcard
                     indv.gene[j] = random.nextInt(2);
                     counter = 0;
                 } else {
@@ -258,7 +275,7 @@ public class GA {
             } else {
                 for (int i = 0; i < array2.length; i++) {
                     if ((array2[i] != array1[i])) {
-                        if (array1[i] != 2) {
+                        if (array2[i] != 2) {
                             same = false;
                         }
                     }
@@ -272,18 +289,17 @@ public class GA {
 
     public static void fitness(Individual[] population, Rule[] rulePopulation, Rule[] trainingSet) {
 
+        int match = 0;
         for (int z = 0; z < population.length; z++) {
             //create rules for each individual
             population[z].fitness = 0;
             rulePopulation = createRules(splitIndividual(population[z]));
 
-            for (int i = 0; i < rulePopulation.length; i++) {
-                for (int j = 0; j < trainingSet.length; j++) {
-                    if (compareArrays(rulePopulation[i].gene, trainingSet[j].gene)) {
-                        if (rulePopulation[i].output == trainingSet[j].output) {
-                            System.out.println("MATCH!");
-                            System.out.println(Arrays.toString(rulePopulation[i].gene) + rulePopulation[i].output +
-                                    "\n" + Arrays.toString(trainingSet[j].gene) + trainingSet[j].output);
+            for (int i = 0; i < trainingSet.length; i++) {
+                for (int j = 0; j < rulePopulation.length; j++) {
+                    if (compareArrays(trainingSet[i].gene, rulePopulation[j].gene)) {
+                        if (trainingSet[i].output == rulePopulation[j].output) {
+                            match++;
                             population[z].fitness++;
                             break;
                         }
@@ -312,7 +328,7 @@ public class GA {
             }
         }
         System.out.println("Total Fitness " + totalFitness);
-       // printRulePopulation(allGeneratedRules);
+        // printRulePopulation(allGeneratedRules);
         return totalFitness;
     }
 
@@ -352,8 +368,8 @@ public class GA {
                 fittestIndex = i;
             }
         }
-        System.out.println("\nfittest =" + Arrays.toString(population[fittestIndex].gene) + population[fittestIndex].fitness);
-        System.out.println("population avg. fitness = " + averageFitness);
+        System.out.println("\nfittest: " + population[fittestIndex].fitness);
+        System.out.println("Average Fitness: " + averageFitness);
     }
 
     public static int populationTotalFitness(Individual[] population) {
@@ -378,7 +394,6 @@ public class GA {
         for (int i = 0; i < population.length; i++) {
             System.out.println("offspring " + i + Arrays.toString(population[i].gene) + population[i].fitness);
         }
-        System.out.println("\n");
     }
 
     public static void crossover(Individual[] population, Individual[] offspring, double crossoverRate) {
@@ -407,7 +422,7 @@ public class GA {
         }
     }
 
-    public static void mutation(Individual[] population, Individual[] mutatedOffspring, double mutationRate, double mutationProbability) {
+    public static void mutation(Individual[] population, Individual[] mutatedOffspring, double mutationRate, double mutationProbability, int outputIndex) {
 
         // Iterate through gene, randomly select whether
         // or not to change the value of the genome
@@ -420,7 +435,7 @@ public class GA {
             if (mutationProbability < mutant.nextDouble()) {
                 offspring[i] = population[i].clone();
             } else {
-                offspring[i] = population[i].mutate(mutationRate);
+                offspring[i] = population[i].mutate(mutationRate, outputIndex);
             }
         }
         // deep copy using .clone
@@ -440,8 +455,6 @@ public class GA {
                 weakestIndex = i;
             }
         }
-//        System.out.println("weakest " + Arrays.toString(population[weakestIndex].gene));
-//        System.out.println("fittest " + Arrays.toString(population[fittestIndex].gene));
 
         // overwrite weakest individual with fittest
         population[weakestIndex] = new Individual(population[fittestIndex].gene, population[fittestIndex].fitness);
@@ -452,11 +465,71 @@ public class GA {
         }
     }
 
+    public static Individual getFittest(Individual[] population) {
+
+        Individual fitty;
+        int weakestIndex = 0;
+        int fittestIndex = 0;
+        for (int i = 0; i < population.length; i++) {
+            if (population[i].fitness >= population[fittestIndex].fitness) {
+                fittestIndex = i;
+            } else if (population[i].fitness <= population[weakestIndex].fitness) {
+                weakestIndex = i;
+            }
+        }
+
+        fitty = new Individual(population[fittestIndex].gene, population[fittestIndex].fitness);
+        return fitty;
+    }
+
+    public static Individual getWorst(Individual[] population) {
+
+        Individual weaky;
+        int weakestIndex = 0;
+        int fittestIndex = 0;
+        for (int i = 0; i < population.length; i++) {
+            if (population[i].fitness >= population[fittestIndex].fitness) {
+                fittestIndex = i;
+            } else if (population[i].fitness <= population[weakestIndex].fitness) {
+                weakestIndex = i;
+            }
+        }
+
+        weaky = new Individual(population[weakestIndex].gene, population[weakestIndex].fitness);
+        return weaky;
+    }
+
+    public static Individual[] compareBest(Individual fitty, Individual[] population) {
+
+        Individual[] offspring = new Individual[POPULATION_SIZE];
+
+        int weakestIndex = 0;
+        int fittestIndex = 0;
+        for (int i = 0; i < population.length; i++) {
+            if (population[i].fitness >= population[fittestIndex].fitness) {
+                fittestIndex = i;
+            } else if (population[i].fitness <= population[weakestIndex].fitness) {
+                weakestIndex = i;
+            }
+        }
+
+        if (population[fittestIndex].fitness < fitty.fitness) {
+            population[fittestIndex] = fitty.clone();
+        } else {
+            population[weakestIndex] = fitty.clone();
+        }
+
+        for (int i = 0; i < population.length; i++) {
+            offspring[i] = new Individual(population[i].gene, population[i].fitness);
+        }
+        return offspring;
+    }
+
     public static void finished(Individual[] individualPopulation, Rule[] trainingSet, int generations) {
 
         for (int i = 0; i < individualPopulation.length; i++) {
-            if (individualPopulation[i].fitness == RULESET_POPULATION_SIZE) {
-//            if (populationTotalFitness(individualPopulation) == RULETRAINING_POPULATION_SIZE) {
+//            if (individualPopulation[i].fitness == RULESET_POPULATION_SIZE) {
+            if (individualPopulation[i].fitness == RULETRAINING_POPULATION_SIZE) {
                 NOT_FINISHED = false;
             }
         }
@@ -466,7 +539,6 @@ public class GA {
 //        }
         if (!NOT_FINISHED) {
             System.out.println("finished.\nGeneration " + generations);
-            printArray(individualPopulation);
         } else {
             System.out.println("\nGeneration " + generations);
         }

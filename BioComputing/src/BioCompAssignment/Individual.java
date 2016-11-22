@@ -59,23 +59,65 @@ public class Individual {
         return clone;
     }
 
-    public Individual mutate(double mutationRate) {
+    public Individual mutate(double mutationRate, int outputIndex) {
 
         Individual individual = new Individual(gene, fitness);
         Individual individualCopy;
         Random mutant = new Random();
+        int counter = 0;
 
+        // flip bits in array at preset probability of mutationPrrobability
         for (int j = 0; j < individual.gene.length; j++) {
-            // flip bits in array at preset probability (0.1)
             if (mutationRate > mutant.nextDouble()) {
-                if (individual.gene[j] == 0) {
-                    individual.gene[j] = 1;
-                } else if (individual.gene[j] == 1) {
-                    individual.gene[j] = 0;
+                
+                if (counter == outputIndex) {
+                    if (individual.gene[j] == 0) {
+                        individual.gene[j] = 1;
+                    } else if (individual.gene[j] == 1) {
+                        individual.gene[j] = 0;
+                    }
+                } else {
+
+                    switch (individual.gene[j]) {
+                        case 0: {
+                            int replacementGenome = 0;
+                            while (replacementGenome == 0) {
+                                replacementGenome = mutant.nextInt(3);
+                            }
+                            individual.gene[j] = replacementGenome;
+                            break;
+                        }
+                        case 1: {
+                            int replacementGenome = 1;
+                            while (replacementGenome == 1) {
+                                replacementGenome = mutant.nextInt(3);
+                            }
+                            individual.gene[j] = replacementGenome;
+                            break;
+                        }
+                        case 2: {
+                            int replacementGenome = 2;
+                            while (replacementGenome == 2) {
+                                replacementGenome = mutant.nextInt(3);
+                            }
+                            individual.gene[j] = replacementGenome;
+                            break;
+                        }
+                        default:
+                            break;
+                    }
                 }
             }
+            
+            counter++;
+            if(counter == outputIndex){
+                counter = 0;
+            }
         }
+
         individualCopy = individual.clone();
         return individualCopy;
     }
+    
+    
 }
