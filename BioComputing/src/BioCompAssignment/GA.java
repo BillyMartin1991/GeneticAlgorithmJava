@@ -57,6 +57,8 @@ public class GA {
 //        for (int i = 0; i < 10; i++) {
 
             generations++;
+            
+            
 
             // Calculate Fitness
             System.out.println("\nFitness");
