@@ -28,7 +28,7 @@ public class GA {
     private static final int RULETRAINING_POPULATION_SIZE = 64;
     private static final int RULESET_POPULATION_SIZE = 64;
     private static final int GENOMES = 448;
-    private static final int POPULATION_SIZE = 10;
+    private static final int POPULATION_SIZE = 500;
     private static final int GENERATIONS = 50;
     private static final double MUTATION_RATE = 0.01;
     private static final double MUTATION_PROBABILITY = 1;
@@ -45,7 +45,7 @@ public class GA {
 
     public static void runneth() throws FileNotFoundException {
 
-        PrintWriter pw = new PrintWriter(new File("filedump/test2.csv"));
+        PrintWriter pw = new PrintWriter(new File("filedump/test3.csv"));
         StringBuilder sb = new StringBuilder();
         Individual[] individualPopulation = new Individual[POPULATION_SIZE];
         Individual[] offspring = new Individual[POPULATION_SIZE];
@@ -97,6 +97,9 @@ public class GA {
 
             finished(individualPopulation, ruleTrainingPopulation, generations);
         }
+        pw.write(sb.toString());
+        pw.close();
+        System.out.println("file exported");
     }
 
     public static void generateRulePopulation(Rule[] rulePopulation, String File) {
@@ -565,10 +568,6 @@ public class GA {
         }
         double averageFitness = (double) k / population.length;
 
-        for (int l = 0; l < population[fittestIndex].gene.length; l++) {
-            sb.append(population[fittestIndex].gene[l]);
-        }
-        sb.append(',');
         sb.append(population[fittestIndex].fitness);
         sb.append(',');
         sb.append(averageFitness);
