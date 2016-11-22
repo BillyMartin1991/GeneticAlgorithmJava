@@ -22,6 +22,7 @@ public class GA {
 //    private static final int RULE_GENOMES = 6;
 //    private static final int RULETRAINING_POPULATION_SIZE = 64;
 //    private static final int GENOMES = 70;
+    
     // DataSet2
     private static final int RULE_GENOMES = 6;
     private static final int RULETRAINING_POPULATION_SIZE = 64;
@@ -228,7 +229,6 @@ public class GA {
             }
         }
         return listOfArrays;
-
     }
 
     public static Rule[] createRules(List<int[]> listOfArrays) {
@@ -319,7 +319,7 @@ public class GA {
             }
         }
         System.out.println("Total Fitness " + totalFitness);
-        printRulePopulation(allGeneratedRules);
+       // printRulePopulation(allGeneratedRules);
         return totalFitness;
     }
 
