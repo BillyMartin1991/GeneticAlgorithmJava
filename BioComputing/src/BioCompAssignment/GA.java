@@ -55,7 +55,7 @@ public class GA {
 
             // Calculate Fitness
             System.out.println("\nFitness");
-            fitness2(individualPopulation, rulePopulation, ruleTrainingPopulation);
+            fitnessWildcards(individualPopulation, rulePopulation, ruleTrainingPopulation);
             populationAverageFitness(individualPopulation);
 
             // Selection, Xover, Mutation
@@ -65,7 +65,7 @@ public class GA {
             System.out.println("mutation");
             mutation(individualPopulation, offspring, MUTATION_RATE, MUTATION_PROBABILITY, RULE_GENOMES);
 
-            fitness2(offspring, rulePopulation, ruleTrainingPopulation);
+            fitnessWildcards(offspring, rulePopulation, ruleTrainingPopulation);
             printArray(offspring);
             
             // Fitness
@@ -292,7 +292,7 @@ public class GA {
         }
     }
 
-    public static void fitness2(Individual[] population, Rule[] rulePopulation, Rule[] trainingSet) {
+    public static void fitnessWildcards(Individual[] population, Rule[] rulePopulation, Rule[] trainingSet) {
 
         int match = 0;
         for (int z = 0; z < population.length; z++) {
