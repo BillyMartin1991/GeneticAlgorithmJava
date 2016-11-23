@@ -20,10 +20,10 @@ public class GA {
 
     private static final int RULE_GENOMES = 5;
     private static final int RULETRAINING_POPULATION_SIZE = 32;
-    private static final int RULESET_POPULATION_SIZE = 10;
-    private static final int GENOMES = 60;
-    private static final int POPULATION_SIZE = 10;
-    private static final int GENERATIONS = 50;
+    private static final int RULESET_POPULATION_SIZE = 11;
+    private static final int GENOMES = 66;
+    private static final int POPULATION_SIZE = 1000;
+    private static final int GENERATIONS = 5000;
     private static final double MUTATION_RATE = 0.01;
     private static final double MUTATION_PROBABILITY = 1;
     private static final double CROSSOVER_RATE = 1;
@@ -47,7 +47,7 @@ public class GA {
         Rule[] rulePopulation = new Rule[RULESET_POPULATION_SIZE];
         int generations = 0;
 
-        generateRulePopulation(ruleTrainingPopulation, DATA_SET_2);
+        generateRulePopulation(ruleTrainingPopulation, DATA_SET_1);
         generateIndividualPopulation(individualPopulation, GENOMES);
 
         System.out.println("\nFitness");
@@ -68,7 +68,7 @@ public class GA {
         Individual saveFittest = getFittest(individualPopulation);
 
 //        while (NOT_FINISHED) {
-        for (int i = 0; i < 500; i++) {
+        for (int i = 0; i < GENERATIONS; i++) {
 
             generations++;
 
@@ -371,8 +371,13 @@ public class GA {
                 fittestIndex = i;
             }
         }
-        System.out.println("\nfittest =" + population[fittestIndex].fitness);
-        System.out.println("population avg. fitness = " + averageFitness);
+                
+        //error
+        int error = (RULETRAINING_POPULATION_SIZE - population[fittestIndex].fitness);
+        double errorPercentage = (double) error / RULETRAINING_POPULATION_SIZE * 100;
+        
+        System.out.println("Average Fitness: " + averageFitness);
+        System.out.println("Classification error: " + errorPercentage + "%");
     }
 
     public static int populationTotalFitness(Individual[] population) {
