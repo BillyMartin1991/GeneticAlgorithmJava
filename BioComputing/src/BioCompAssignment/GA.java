@@ -372,7 +372,13 @@ public class GA {
                 fittestIndex = i;
             }
         }
+        
+        //error
+        int error = (RULETRAINING_POPULATION_SIZE - population[fittestIndex].fitness);
+        double errorPercentage = (double) error / RULETRAINING_POPULATION_SIZE * 100;
+        
         System.out.println("Average Fitness: " + averageFitness);
+        System.out.println("Classification error: " + errorPercentage + "%");
     }
 
     public static int populationTotalFitness(Individual[] population) {
