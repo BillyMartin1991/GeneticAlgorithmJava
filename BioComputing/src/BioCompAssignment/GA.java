@@ -26,10 +26,10 @@ public class GA {
     // DataSet2
     private static final int RULE_GENOMES = 6;
     private static final int RULETRAINING_POPULATION_SIZE = 64;
-    private static final int RULESET_POPULATION_SIZE = 10;
-    private static final int GENOMES = 70;
+    private static final int RULESET_POPULATION_SIZE = 5;
+    private static final int GENOMES = 35;
     private static final int POPULATION_SIZE = 10;
-    private static final int GENERATIONS = 500;
+    private static final int GENERATIONS = 1000;
     private static final double MUTATION_RATE = 0.01;
     private static final double MUTATION_PROBABILITY = 1;
     private static final double CROSSOVER_RATE = 1;
@@ -55,6 +55,7 @@ public class GA {
 
         generateRulePopulation(ruleTrainingPopulation, DATA_SET_2);
         generateIndividualPopulation(individualPopulation, GENOMES);
+        printArray(individualPopulation);
 
         System.out.println("\nFitness");
         fitness(individualPopulation, rulePopulation, ruleTrainingPopulation);
@@ -73,8 +74,8 @@ public class GA {
         keepBest(offspring, individualPopulation);
         Individual saveFittest = getFittest(individualPopulation);
 
-//        while (NOT_FINISHED) {
-        for (int i = 0; i < 500; i++) {
+        while (NOT_FINISHED) {
+//        for (int i = 0; i < GENERATIONS; i++) {
 
             generations++;
 
@@ -97,6 +98,9 @@ public class GA {
 
             finished(individualPopulation, ruleTrainingPopulation, generations);
         }
+        Rule[] bestRules = createRules(splitIndividual(saveFittest));
+        printRulePopulation(bestRules);
+        
         pw.write(sb.toString());
         pw.close();
         System.out.println("file exported");
@@ -377,7 +381,7 @@ public class GA {
         int error = (RULETRAINING_POPULATION_SIZE - population[fittestIndex].fitness);
         double errorPercentage = (double) error / RULETRAINING_POPULATION_SIZE * 100;
         
-        System.out.println("Average Fitness: " + averageFitness);
+        System.out.println("\nAverage Fitness: " + averageFitness);
         System.out.println("Classification error: " + errorPercentage + "%");
     }
 
@@ -394,7 +398,7 @@ public class GA {
 
         for (int i = 0; i < rulePopulation.length; i++) {
             System.out.println("Rule Population " + i + Arrays.toString(rulePopulation[i].gene)
-                    + rulePopulation[i].output + rulePopulation[i].fitness);
+                    + rulePopulation[i].output);
         }
     }
 
@@ -488,7 +492,7 @@ public class GA {
         }
 
         fitty = new Individual(population[fittestIndex].gene, population[fittestIndex].fitness);
-        System.out.println("\nfittest: " + fitty.fitness);
+        System.out.println("fittest: " + fitty.fitness);
         return fitty;
     }
 
@@ -550,7 +554,7 @@ public class GA {
         if (!NOT_FINISHED) {
             System.out.println("finished.\nGeneration " + generations);
         } else {
-            System.out.println("\nGeneration " + generations);
+            System.out.println("Generation " + generations);
         }
     }
     
